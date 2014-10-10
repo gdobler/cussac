@@ -14,6 +14,7 @@ import time
 req = 0
 t = 500
 next_max_id = 0
+print 'Started querying...'
 while True:
     try:
         tso = TwitterSearchOrder()
