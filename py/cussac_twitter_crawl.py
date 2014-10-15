@@ -15,6 +15,8 @@ req = 0
 t = 500
 next_max_id = 0
 print 'Started querying...'
+
+
 while True:
     try:
         tso = TwitterSearchOrder()
@@ -70,6 +72,7 @@ while True:
                     next_max_id -= 1  # decrement to avoid seeing this tweet again
 
         # set lowest ID as MaxID
+            print records
             print 'len: ' + str(len(records))
             tso.setMaxID(next_max_id)
             #raise TwitterSearchException(1000)
