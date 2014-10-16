@@ -31,7 +31,7 @@ def saveRecordsToCSV (records,t):
         
     return records
 
-def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300):
+def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300, sleepTime=4.35):
     req = 0
     next_max_id = 0
     startTime = time.time()
@@ -95,7 +95,9 @@ def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300):
             # set lowest ID as MaxID
             print 'Number of Tweets in memory: ' + str(len(records))
             tso.setMaxID(next_max_id)
-            #raise TwitterSearchException(1000)
+            # Sleep time was calculated in order to not exceed Twitter's limit = 180 requests per 15 min
+            print 'Sleeping...'
+            time.sleep(sleepTime)
                            
         except TwitterSearchException, e:
             print e
@@ -112,12 +114,12 @@ def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300):
             time.sleep(900)
             # Set tso to None to create new Twitter search object 
             tso = None
-
-t = 500
+            
+t = 600
 records = []
 print 'Started querying...'
 queryTwitter(records,t)
 print 'Last save to CSV'
-records = saveRecordsToCSV(records,t)
+records = saveRecordsToCSV(records,t, totalRunTime= 120)
 print 'Number of Tweets in memory: ' + str(len(records))
 
