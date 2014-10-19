@@ -54,7 +54,7 @@ def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300, sleepTime=4.35
                 #tso.setLanguage('en')
                 tso.setCount(100)
                 tso.setIncludeEntities(False)
-                tso.setGeocode(40.69, -73.94, 5)
+                tso.setGeocode(40.69, -73.94, 33)
                 #tso.setUntil(dt.date(2014, 03, 24))        
                 ts = TwitterSearch(consumer_key='FqjFRT1OHl6xyIGoq9uXSA',
                                    consumer_secret='KuhoVREmf7ngwjOse2JOLJOVXNCi2IVEzQZu2B8',
@@ -120,6 +120,6 @@ records = []
 print 'Started querying...'
 queryTwitter(records,t)
 print 'Last save to CSV'
-records = saveRecordsToCSV(records,t, totalRunTime= 120)
+records = saveRecordsToCSV(records,t)
 print 'Number of Tweets in memory: ' + str(len(records))
 
