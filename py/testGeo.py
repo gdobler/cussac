@@ -13,4 +13,5 @@ plt.show()
 
 for index, row in boros.iterrows():
     print row.geometry.contains(Point(40.64946808, -73.93384131))
-    
+    print row.geometry.contains(Point(920000, 140000))
+
