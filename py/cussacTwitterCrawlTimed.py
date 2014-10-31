@@ -7,31 +7,20 @@ import pandas as pd
 import time
 import os
 
-def saveRecordsToCSV (records,t):
+def saveRecordsToCSV (records,outputFileIndex):
     # Create a data frame from tweets saved in records
-    twitterFrame = pd.DataFrame.from_records(records, columns=[
-        'Tweet ID',
-        'Tweeted_At',
-        'Profile_Create_at',
-        'Username',
-        'Location',
-        'Enabled',
-        'Place',
-        'Geo',
-        'Text',
-        'Retweeted_Count',
-        ])
+    twitterFrame = pd.DataFrame.from_records(records, columns=['Tweet ID','Tweeted_At','Profile_Create_at','Username','Location','Enabled','Place','Geo','Text','Retweeted_Count'])
     # Append tweets to CSV file
-    with open('csv_tweets' + str(t) + '.csv', 'a') as f:
+    with open('csv_tweets' + str(outputFileIndex) + '.csv', 'a') as f:
         header = False
-        if os.path.getsize('csv_tweets' + str(t) + '.csv') == 0:
+        if os.path.getsize('csv_tweets' + str(outputFileIndex) + '.csv') == 0:
             header = True
         twitterFrame.to_csv(f, header = header)
         records = []
         
     return records
 
-def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300, sleepTime=4.35):
+def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime):
     req = 0
     next_max_id = 0
     startTime = time.time()
@@ -45,7 +34,7 @@ def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300, sleepTime=4.35
             # Check if it is time to write to file                           
             if now-lastWriteTime>writeToFileTime:
                 print 'Writing to CSV ' + str(len(records)) + ' Tweets'
-                records = saveRecordsToCSV (records,t)
+                records = saveRecordsToCSV (records,outputFileIndex)
                 lastWriteTime = now               
             # Create new twitter search object
             if tso == None:
@@ -54,7 +43,7 @@ def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300, sleepTime=4.35
                 #tso.setLanguage('en')
                 tso.setCount(100)
                 tso.setIncludeEntities(False)
-                tso.setGeocode(40.69, -73.94, 33)
+                tso.setGeocode(40.69, -73.94, 1, km = False)
                 #tso.setUntil(dt.date(2014, 03, 24))        
                 ts = TwitterSearch(consumer_key='FqjFRT1OHl6xyIGoq9uXSA',
                                    consumer_secret='KuhoVREmf7ngwjOse2JOLJOVXNCi2IVEzQZu2B8',
@@ -62,12 +51,11 @@ def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300, sleepTime=4.35
                                    access_token_secret='yyBBOJhxgfw9pezZda2hWF94doONSd50y0JoylYjL3rmY', verify=False)
 
             # Query the Twitter API  
-            text_file = open('json_tweets' + str(t) + '.txt', 'a')
+            text_file = open('json_tweets' + str(outputFileIndex) + '.txt', 'a')
             text_fileE = open('error_log.txt', 'a')
             req += 1
             print 'Request # ' + str(req)
             response = ts.searchTweets(tso)
-            #todo = not len(response['content']['statuses']) == 0
 
             # check all tweets according to their ID
             for tweet in response['content']['statuses']:
@@ -93,8 +81,9 @@ def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300, sleepTime=4.35
                     next_max_id -= 1  # decrement to avoid seeing this tweet again
 
             # set lowest ID as MaxID
-            print 'Number of Tweets in memory: ' + str(len(records))
             tso.setMaxID(next_max_id)
+            
+            print 'Number of Tweets in memory: ' + str(len(records))
             # Sleep time was calculated in order to not exceed Twitter's limit = 180 requests per 15 min
             print 'Sleeping...'
             time.sleep(sleepTime)
@@ -107,19 +96,20 @@ def queryTwitter(records,t,totalRunTime=3600,writeToFileTime=300, sleepTime=4.35
                 pass
             else:
                 text_file.close()
-            t = t + 1
+            outputFileIndex = outputFileIndex + 1
             text_fileE.write(str(e))
             text_fileE.write('\n')
             text_fileE.close()
             time.sleep(900)
             # Set tso to None to create new Twitter search object 
             tso = None
-            
-t = 600
-records = []
-print 'Started querying...'
-queryTwitter(records,t)
-print 'Last save to CSV'
-records = saveRecordsToCSV(records,t)
-print 'Number of Tweets in memory: ' + str(len(records))
+
+def runCollectTweets (outputFileIndex,totalRunTime, writeToFileTime=300, sleepTime=4.35):            
+    records = []
+    print 'Started querying...'
+    queryTwitter(records, outputFileIndex, totalRunTime, writeToFileTime, sleepTime)
+    print 'Last save to CSV'
+    records = saveRecordsToCSV(records,outputFileIndex)
+    print 'Number of Tweets in memory: ' + str(len(records))
+    print 'Done!'
 
