@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from TwitterSearch import *
-import datetime as dt
+from datetime import datetime,date,time
 import pandas as pd
 import time
 import os
+import yaml
+from geoLocator import GeoLocator
+
 
 def saveRecordsToCSV (records,outputFileIndex):
     # Create a data frame from tweets saved in records
@@ -21,6 +24,7 @@ def saveRecordsToCSV (records,outputFileIndex):
     return records
 
 def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime):
+    n = GeoLocator()
     req = 0
     next_max_id = 0
     startTime = time.time()
@@ -44,7 +48,7 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
                 tso.setCount(100)
                 tso.setIncludeEntities(False)
                 tso.setGeocode(40.69, -73.94, 1, km = False)
-                #tso.setUntil(dt.date(2014, 03, 24))        
+                #tso.setUntil(datetime.date(2014, 03, 24))        
                 ts = TwitterSearch(consumer_key='FqjFRT1OHl6xyIGoq9uXSA',
                                    consumer_secret='KuhoVREmf7ngwjOse2JOLJOVXNCi2IVEzQZu2B8',
                                    access_token='114454541-xcjy2sbl7Rr4oIaogsaBrlVL5H4CvcdvOSMy3MnR',
@@ -73,7 +77,15 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
                 tup = tup + (str(tweet['geo']), )
                 tup = tup + (str(tweet['text'].encode('ascii', 'ignore')), )
                 tup = tup + (str(tweet['retweet_count']), )
-                records.append(tup)
+                # Save only tweets with Geo within NYC or without geo at all
+                try:
+                    geoObj = yaml.load(tup[7])
+                    lat = geoObj["u'coordinates'"][0]
+                    long = geoObj["u'coordinates'"][1]
+                    if n.isNYC(lat,long):
+                        records.append(tup)
+                except:
+                    records.append(tup)
 
                 # current ID is lower than current next_max_id?
                 if tweet_id < next_max_id or next_max_id == 0:
@@ -96,7 +108,7 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
                 pass
             else:
                 text_file.close()
-            outputFileIndex = outputFileIndex + 1
+            outputFileIndex = datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")
             text_fileE.write(str(e))
             text_fileE.write('\n')
             text_fileE.close()
@@ -104,7 +116,7 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
             # Set tso to None to create new Twitter search object 
             tso = None
 
-def runCollectTweets (outputFileIndex,totalRunTime, writeToFileTime=300, sleepTime=4.35):            
+def runCollectTweets (outputFileIndex,totalRunTime, writeToFileTime=300, sleepTime=4):            
     records = []
     print 'Started querying...'
     queryTwitter(records, outputFileIndex, totalRunTime, writeToFileTime, sleepTime)
@@ -112,4 +124,11 @@ def runCollectTweets (outputFileIndex,totalRunTime, writeToFileTime=300, sleepTi
     records = saveRecordsToCSV(records,outputFileIndex)
     print 'Number of Tweets in memory: ' + str(len(records))
     print 'Done!'
+    
+def main():
+    i = datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")
+    runCollectTweets(i,totalRunTime=float('Inf') ,writeToFileTime=900)
+ 
+if __name__ == '__main__':
+    main()
 

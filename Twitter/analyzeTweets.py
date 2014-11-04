@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 import math
 
 requestsTimes = []
-n=5
+n=1
 for i in range (n):
     requestsTimes.append(datetime.utcnow())
-    tct.runCollectTweets (i,totalRunTime=600,writeToFileTime=300)
+    tct.runCollectTweets (i,totalRunTime=900,writeToFileTime=300)
     time.sleep(10)
  
 
