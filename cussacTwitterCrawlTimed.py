@@ -43,11 +43,11 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
             # Create new twitter search object
             if tso == None:
                 tso = TwitterSearchOrder()
-                tso.setKeywords([''])
+                tso.set_keywords([''])
                 #tso.setLanguage('en')
-                tso.setCount(100)
-                tso.setIncludeEntities(False)
-                tso.setGeocode(40.69, -73.94, 1, km = False)
+                tso.set_count(100)
+                tso.set_include_entities(False)
+                tso.set_geocode(40.69, -73.94, 1, imperial_metric = False)
                 #tso.setUntil(datetime.date(2014, 03, 24))        
                 ts = TwitterSearch(consumer_key='FqjFRT1OHl6xyIGoq9uXSA',
                                    consumer_secret='KuhoVREmf7ngwjOse2JOLJOVXNCi2IVEzQZu2B8',
@@ -59,7 +59,7 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
             text_fileE = open('error_log.txt', 'a')
             req += 1
             print 'Request # ' + str(req)
-            response = ts.searchTweets(tso)
+            response = ts.search_tweets(tso)
 
             # check all tweets according to their ID
             for tweet in response['content']['statuses']:
@@ -93,7 +93,7 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
                     next_max_id -= 1  # decrement to avoid seeing this tweet again
 
             # set lowest ID as MaxID
-            tso.setMaxID(next_max_id)
+            tso.set_max_id(next_max_id)
             
             print 'Number of Tweets in memory: ' + str(len(records))
             # Sleep time was calculated in order to not exceed Twitter's limit = 180 requests per 15 min
@@ -127,7 +127,7 @@ def runCollectTweets (outputFileIndex,totalRunTime, writeToFileTime=300, sleepTi
     
 def main():
     i = datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")
-    runCollectTweets(i,totalRunTime=float('Inf') ,writeToFileTime=900)
+    runCollectTweets(i,totalRunTime=float('Inf') ,writeToFileTime=900, sleepTime = 0)
  
 if __name__ == '__main__':
     main()
