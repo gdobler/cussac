@@ -20,8 +20,9 @@ def saveRecordsToCSV (records,outputFileIndex):
             header = True
         twitterFrame.to_csv(f, header = header)
         records = []
-        
-    return records
+    
+    outputFileIndex = datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")    
+    return records, outputFileIndex
 
 def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime):
     n = GeoLocator()
@@ -38,7 +39,7 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
             # Check if it is time to write to file                           
             if now-lastWriteTime>writeToFileTime:
                 print 'Writing to CSV ' + str(len(records)) + ' Tweets'
-                records = saveRecordsToCSV (records,outputFileIndex)
+                records, outputFileIndex = saveRecordsToCSV (records,outputFileIndex)
                 lastWriteTime = now               
             # Create new twitter search object
             if tso == None:
@@ -47,7 +48,7 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
                 #tso.setLanguage('en')
                 tso.set_count(100)
                 tso.set_include_entities(False)
-                tso.set_geocode(40.69, -73.94, 1, imperial_metric = False)
+                tso.set_geocode(40.69, -73.94, 20, imperial_metric = False)
                 #tso.setUntil(datetime.date(2014, 03, 24))        
                 ts = TwitterSearch(consumer_key='FqjFRT1OHl6xyIGoq9uXSA',
                                    consumer_secret='KuhoVREmf7ngwjOse2JOLJOVXNCi2IVEzQZu2B8',
@@ -121,13 +122,13 @@ def runCollectTweets (outputFileIndex,totalRunTime, writeToFileTime=300, sleepTi
     print 'Started querying...'
     queryTwitter(records, outputFileIndex, totalRunTime, writeToFileTime, sleepTime)
     print 'Last save to CSV'
-    records = saveRecordsToCSV(records,outputFileIndex)
+    records, outputFileIndex = saveRecordsToCSV(records,outputFileIndex)
     print 'Number of Tweets in memory: ' + str(len(records))
     print 'Done!'
     
 def main():
     i = datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")
-    runCollectTweets(i,totalRunTime=float('Inf') ,writeToFileTime=900, sleepTime = 0)
+    runCollectTweets(i,totalRunTime=float('Inf') ,writeToFileTime=3600, sleepTime = 4)
  
 if __name__ == '__main__':
     main()
