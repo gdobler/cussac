@@ -9,19 +9,16 @@ import os
 import yaml
 from geoLocator import GeoLocator
 
+def getFile_index():
+    return datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")
+
 
 def saveRecordsToCSV (records,outputFileIndex):
-    # Create a data frame from tweets saved in records
     twitterFrame = pd.DataFrame.from_records(records, columns=['Tweet ID','Tweeted_At','Profile_Create_at','Username','Location','Enabled','Place','Geo','Text','Retweeted_Count'])
-    # Append tweets to CSV file
-    with open('csv_tweets' + str(outputFileIndex) + '.csv', 'a') as f:
-        header = False
-        if os.path.getsize('csv_tweets' + str(outputFileIndex) + '.csv') == 0:
-            header = True
-        twitterFrame.to_csv(f, header = header)
-        records = []
-    
-    outputFileIndex = datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")    
+    with open('csv_tweets' + str(outputFileIndex) + '.csv', 'w') as f:
+        twitterFrame.to_csv(f, header = True)
+    records = []
+    outputFileIndex = getFile_index() 
     return records, outputFileIndex
 
 def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime):
@@ -41,7 +38,7 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
                 print 'Writing to CSV ' + str(len(records)) + ' Tweets'
                 records, outputFileIndex = saveRecordsToCSV (records,outputFileIndex)
                 lastWriteTime = now               
-            # Create new twitter search object
+            # If first run, or recover after exception, create new twitter search object
             if tso == None:
                 tso = TwitterSearchOrder()
                 tso.set_keywords([''])
@@ -97,7 +94,6 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
             tso.set_max_id(next_max_id)
             
             print 'Number of Tweets in memory: ' + str(len(records))
-            # Sleep time was calculated in order to not exceed Twitter's limit = 180 requests per 15 min
             print 'Sleeping...'
             time.sleep(sleepTime)
                            
@@ -109,17 +105,18 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
                 pass
             else:
                 text_file.close()
-            outputFileIndex = datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")
+            outputFileIndex = getFile_index()
             text_fileE.write(str(e))
             text_fileE.write('\n')
             text_fileE.close()
+            print 'sleeping after error...'
             time.sleep(900)
             # Set tso to None to create new Twitter search object 
             tso = None
 
 def runCollectTweets (outputFileIndex,totalRunTime, writeToFileTime=300, sleepTime=4):            
     records = []
-    print 'Started querying...'
+    print 'Started querying'
     queryTwitter(records, outputFileIndex, totalRunTime, writeToFileTime, sleepTime)
     print 'Last save to CSV'
     records, outputFileIndex = saveRecordsToCSV(records,outputFileIndex)
@@ -127,8 +124,25 @@ def runCollectTweets (outputFileIndex,totalRunTime, writeToFileTime=300, sleepTi
     print 'Done!'
     
 def main():
-    i = datetime.strftime(datetime.utcnow(), "%b_%d_%Y_%H_%M")
-    runCollectTweets(i,totalRunTime=float('Inf') ,writeToFileTime=3600, sleepTime = 4)
+    # set running params:
+    # set the name of the first csv file
+    i = getFile_index()
+#     totalRunTime=3600
+    totalRunTime=float('Inf')
+    writeToFileTime=900
+    # Sleep time was calculated in order to not exceed Twitter's limit = 180 requests per 15 min
+    sleepTime = 4.35
+    
+    print "------------------------------------------"
+    print "Run Params:"
+    print "file index starts at " + str(i)
+    print "total running time " + str(totalRunTime)
+    print "write to file every " + str(writeToFileTime)
+    print "sleep time " + str(sleepTime)
+    print "------------------------------------------"
+
+    
+    runCollectTweets(i,totalRunTime=totalRunTime ,writeToFileTime=writeToFileTime, sleepTime = sleepTime)
  
 if __name__ == '__main__':
     main()
