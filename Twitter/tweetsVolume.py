@@ -29,3 +29,7 @@ for i in range(10):
     print '\t Geo enabled: ' + str (numGeo) + ' (' + str(numGeo*100.00/total) + '%)'
     print '\t Geo disabled: ' + str (numNotGeo) + ' (' + str(numNotGeo*100.00/total) + '%)'
     print '\t Total: ' + str(total)
+    
+    
+    
+    

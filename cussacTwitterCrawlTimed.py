@@ -29,7 +29,8 @@ def queryTwitter(records,outputFileIndex,totalRunTime,writeToFileTime, sleepTime
     lastWriteTime = startTime
     tso = None
     ts = None
-    while time.time() - startTime < totalRunTime:
+#     while time.time() - startTime < totalRunTime:
+    while True:
         try:
             now = time.time()
             print 'Total running time: ' + str(now-startTime) + ' seconds'
@@ -129,7 +130,7 @@ def main():
     i = getFile_index()
 #     totalRunTime=3600
     totalRunTime=float('Inf')
-    writeToFileTime=900
+    writeToFileTime=300
     # Sleep time was calculated in order to not exceed Twitter's limit = 180 requests per 15 min
     sleepTime = 4.35
     
