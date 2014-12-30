@@ -132,7 +132,7 @@ def main():
     totalRunTime=float('Inf')
     writeToFileTime=300
     # Sleep time was calculated in order to not exceed Twitter's limit = 180 requests per 15 min
-    sleepTime = 4.35
+    sleepTime = 5
     
     print "------------------------------------------"
     print "Run Params:"

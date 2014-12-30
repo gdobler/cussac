@@ -23,7 +23,7 @@ def count_words(tweetText, dict, stemDict):
     
     words = tweetText.split(' ')
     
-    stopWords = set(stopwords.words('english')+['http','','@'])
+    stopWords = set(stopwords.words('english')+['http','','@','rt'])
     stemmer = stem.PorterStemmer()
     
     for w in words:

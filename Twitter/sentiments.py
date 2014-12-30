@@ -7,7 +7,6 @@ from textblob import TextBlob
 import yaml
 import csv
 import os
-from astropy.constants.si import alpha
 import matplotlib.pyplot as plt
 
 def sentimet_score_tweet (text):
