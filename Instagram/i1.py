@@ -53,7 +53,7 @@ ltm,lonm = 40.69, -73.94
 ltbk,lonbk = 40.6928, -73.99
 #I will be sharing my client ID and secret. But you can get your own by applying for a new 
 #application
-api = InstagramAPI(client_id='1979574ea044469b8de19ca2004024b7', client_secret='da15b429178046508a469abf148f415e')
+api = InstagramAPI(client_id='16f7ef0d35624ad3a3b07e18c9e45ef8', client_secret='22fdaddd6282489aab74528e16a06cb9')
 count = 0
 #store = []
 #storing only unique posts, which are identified by their ID which we store in a dictionary
