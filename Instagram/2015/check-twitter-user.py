@@ -31,11 +31,6 @@ def print_result(screen_name, msg):
     if "taken" in msg:
         print screen_name
         return screen_name
-    '''    sys.stdout.write(display % ("+", screen_name, msg,))
-    elif "error" in msg:
-        sys.stdout.write(display % ("!", screen_name, msg))
-    else:
-        sys.stdout.write(display % ("-", screen_name, msg))'''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog="check-twitter-user")
@@ -48,8 +43,6 @@ if __name__ == '__main__':
     writer = csv.writer(f1)
     for i in reader:
         screen_name = i[1]
-        #screen_name = args.username
-
         msg = check_name(screen_name)
         x = [print_result(screen_name, msg)]
         writer.writerow(x)
