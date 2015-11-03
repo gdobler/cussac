@@ -3,7 +3,7 @@ This script runs an API call to get every follower ID of a "social landmark"
 IMPORTANT: It takes in the Twitter handle of the social landmark
 as a command-line argument.
 DOUBLE IMPORTANT: this ONLY returns IDs. In order to get the full profile
-information for that user, another API call is needed -- see 
+information for that user, another API call is needed -- see
 returnfollowerdetails.py
 Documentation: https://dev.twitter.com/rest/reference/get/followers/ids
 '''
@@ -19,11 +19,18 @@ import time
 import datetime
 
 #Best practice is to NOT keep API keys in public GitHub repos!
-APIKEYS = pd.read_json('cussacAPIKeys.json')
-CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'].values)[0]
-CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'].values)[0]
-ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'].values)[0]
-ACCESS_TOKEN_SECRET = (APIKEYS['ACCESS_TOKEN_SECRET'].values)[0]
+
+APIKEYS = pd.read_json('../../cussacTest/cussacAPIKeys.json', typ = 'series')
+CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'])
+CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'])
+ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'])
+ACCESS_TOKEN_SECRET = (APIKEYS['ACCESS_TOKEN_SECRET'])
+
+#APIKEYS = pd.read_json('cussacAPIKeys.json')
+#CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'].values)[0]
+#CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'].values)[0]
+#ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'].values)[0]
+#ACCESS_TOKEN_SECRET = (APIKEYS['ACCESS_TOKEN_SECRET'].values)[0]
 
 #Setting up API authentication
 def oauth_req(url, http_method="GET", post_body='', http_headers=None):
@@ -41,8 +48,8 @@ def getAllFollowers(username):
     apicallcount = 0
     numberofrecords = 0
     baseApiUrl = 'https://api.twitter.com/1.1/followers/ids.json?screen_name=' + username + '&count=5000'
-#a 'cursor' in the context of API calls is the way you track which page of results you're 
-#currently on. Twitter counts down from most recent followers to oldest followers, 
+#a 'cursor' in the context of API calls is the way you track which page of results you're
+#currently on. Twitter counts down from most recent followers to oldest followers,
 #and gives the cursor of 0 when you reach the last page of results, and allows you to indicate
 #initialize the call with -1
     cursor = -1
@@ -60,8 +67,8 @@ def getAllFollowers(username):
             queryResults = oauth_req(requestUrl)
         except:
             print 'Exceeded call limit, sleeping for 15 minutes'
-            #it's possible to hit exceptions for something other than call 
-            #limit--improvement to create if-statement to display the exact 
+            #it's possible to hit exceptions for something other than call
+            #limit--improvement to create if-statement to display the exact
             #exception, handle exceptions differently.
             print datetime.datetime.now()
             print 'latest cursor:' + cursor
@@ -82,14 +89,14 @@ def getAllFollowers(username):
             apicallcount +=1
             print "number of API calls:" + str(apicallcount)
             numberofrecords = numberofrecords + len(queryResults['ids'])
-            print 'number of records:' +  str(numberofrecords) 
-            #debugging: making sure the cursor is changing, save most recent 
+            print 'number of records:' +  str(numberofrecords)
+            #debugging: making sure the cursor is changing, save most recent
             #cursor in case script breaks before completing
             print 'latest cursor:' + cursor
             print 'sleeping now'
-            #free API access has a limit of one call per minute (specifically, 
+            #free API access has a limit of one call per minute (specifically,
             #15 calls per 15 minutes)
-            time.sleep(60)
+            #time.sleep(60)
 
 
 
@@ -103,6 +110,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
