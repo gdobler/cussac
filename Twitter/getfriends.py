@@ -155,13 +155,30 @@ def main():
     #Code to test
     #Input multiple twitter handles as command line arguments while running script
 
-    #for username in sys.argv[1:]:
-    #    logging.info("Getting follows for @" + username)
-    #	response = getAllFriends(username)
-    #	records[username] = response[username]
+    for username in sys.argv[1:]:
+        logging.info("Getting follows for @" + username)
+    	response = getAllFriends(username)
+    	records[username] = response[username]
+	if len(records.keys()) > 2:
+	    if os.path.isfile('output/cmdlinesamplefollowingids.json'):		
+	    	with open('output/cmdlinesamplefollowingids.json', 'r') as f:
+			temp_dict = json.load(f)
+			#The following code will take keys from record in case of key conflict. Essential to clean data to have only unique users
+			temp_dict.update(records) 		
+			
+		with open ('output/cmdlinesamplefollowingids.json', 'w') as f:
+			json.dump(temp_dict, f)
+			records = {}
+	    else:
+		with open('output/cmdlinesamplefollowingids.json', 'w') as f:
+			json.dump(records, f)
 
-    #with open( 'cmdlinesamplefollowingids.json', 'a') as f:
-    #    json.dump(records, f)
+    with open( 'output/cmdlinesamplefollowingids.json', 'r') as f:
+	temp_dict = json.load(f)
+	temp_dict.update(temp_dict, f)
+    with open('output/cmdlinesamplefollowingids.json', 'w') as f:
+        json.dump(records, f)
+	records = {}
 
 
     file_name = sys.argv[1]
@@ -170,10 +187,30 @@ def main():
     for user in users['username']:
 	response = getAllFriends(user)
         records[user] = response[user]
-        records.append(getAllFriends(user))
-	
-    with open(or.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'a') as f:
+	if len(records.keys()) > 500:
+            if os.path.isfile(os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json'):
+                with open(os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'r') as f:
+                        temp_dict = json.load(f)
+                        #The following code will take keys from record in case of key conflict. 
+			#Essential to use cleaned data that has only unique users
+                        temp_dict.update(records)
+
+                with open (os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
+                        json.dump(temp_dict, f)
+                        records = {}
+            else:
+                with open(os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
+                        json.dump(records, f)
+
+    with open( os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'r') as f:
+        temp_dict = json.load(f)
+        temp_dict.update(temp_dict, f)
+    with open(os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
         json.dump(records, f)
+        records = {}
+	
+    #with open(or.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'a') as f:
+    #    json.dump(records, f)
 
 
 
