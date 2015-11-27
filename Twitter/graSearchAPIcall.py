@@ -16,11 +16,19 @@ import time
 import datetime
 
 #Best practice is to NOT keep API keys in GitHub, but it's too late for that!
-APIKEYS = pd.read_json('cussacAPIKeys.json')
-CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'].values)[0]
-CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'].values)[0]
-ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'].values)[0]
-ACCESS_TOKEN_SECRET = (APIKEYS['ACCESS_TOKEN_SECRET'].values)[0]
+#APIKEYS = pd.read_json('cussacAPIKeys.json')
+#CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'].values)[0]
+#CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'].values)[0]
+#ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'].values)[0]
+#ACCESS_TOKEN_SECRET = (APIKEYS['ACCESS_TOKEN_SECRET'].values)[0]
+
+APIKEYS = pd.read_json('./cussacAPIKeys.json', typ = 'series')
+CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'])
+CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'])
+ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'])
+ACCESS_TOKEN_SECRET = (APIKEYS['ACCESS_TOKEN_SECRET'])
+
+
 
 #dummy empty search term
 searchterm = ' '
@@ -28,7 +36,8 @@ searchterm = ' '
 #approximate centroid for New York City, with a radius of 20 miles--needed to 
 #capture all of Brooklyn and the Bronx, though includes chunks of New Jersey and
 #Long Island.
-location = "40.69,-73.94,20mi"
+#location = "40.69,-73.94,20mi"
+location = "40.013997, -100.825364, 1300mi"
 
 def oauth_req(url, http_method="GET", post_body='', http_headers=None):
     consumer = oauth.Consumer(key=CONSUMER_KEY, secret=CONSUMER_SECRET)
