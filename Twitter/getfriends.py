@@ -24,7 +24,7 @@ import re
 
 #Best practice is to NOT keep API keys in public GitHub repos!
 
-APIKEYS = pd.read_json('./cussacAPIKeys.json', typ = 'series')
+APIKEYS = pd.read_json('cussacAPIKeys.json', typ = 'series')
 CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'])
 CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'])
 ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'])
@@ -70,7 +70,8 @@ def oauth_req(url, http_method="GET", post_body='', http_headers=None):
     if resp['status'] == '200':
 	return content
     elif resp['status'] == '429':
-	
+	logging.info(str(resp))
+	logging.info("Too many requests")
 	raise RateLimitException("Invalid response %s." % resp['status'])
     elif resp['status'] == '401':
         raise NotAuthorizedException("Not authorized %s." % resp['status'])
@@ -89,11 +90,6 @@ def getAllFriends(username):
 
     # TODO : handle script for more than 5000 followings
     cursor = -1
-    #data = {'UserID'  , 'Following' : [], 'DateExtracted' : }
-    #checks to see if there's already a file with followers for this user --
-    #if not, creates new csv file
-    #if not os.path.isfile('/home/cusp/vv744/cussac/cussac/Twitter/output' + username + 'followingids.csv'):
-    #    df.to_csv('/home/cusp/vv744/cussac/cussac/Twitter/output' + username + 'followingids.csv')
     while cursor !='0':
         #try-except-else is the PEP-8 standard for try loops, for explanation see:
         #https://www.python.org/dev/peps/pep-0008/#programming-recommendations
@@ -104,22 +100,23 @@ def getAllFriends(username):
         except RateLimitException as e:
 	    print e
             logging.info('Exceeded call limit, sleeping for 15 minutes')
-            #it's possible to hit exceptions for something other than call
-            #limit--improvement to create if-statement to display the exact
-            #exception, handle exceptions differently.
             logging.info(datetime.datetime.now())
             logging.info('latest cursor:' + str(cursor))
-            time.sleep(900)
+            for i in range(15):
+		t1 =  datetime.datetime.now()
+		time.sleep(60)
+		logging.info('Been sleeping for so far ' + str((t0 - datetime.datetime.now()).total_seconds()) + "seconds")
+		
 	    logging.info("Time between request and now " + str((t0 - datetime.datetime.now()).total_seconds())+ "seconds")
             continue
 	except NotAuthorizedException:
 	    logging.info("Private account - " + username + ", Getting next username")
-	    return
+	    return None
 	except NotFoundException:
 	    logging.info("Handle not found - "+ username)
-	    return
-	except Exception:
-	    logging.error("Unknown Exception occured")
+	    return None
+	except Exception as e:
+	    logging.error("Unknown Exception occured" + str(e))
         else:
 	    logging.info("Time to get followings for " + str(username) + " " + str((t0 - datetime.datetime.now()).total_seconds())+ "seconds")
             actualCursor = queryResults['next_cursor_str']
@@ -137,9 +134,6 @@ def getAllFriends(username):
         #cursor in case script breaks before completing
         logging.info('Latest cursor:' + str(cursor))
         return record
-	#free API access has a limit of one call per minute (specifically,
-        #15 calls per 15 minutes)
-        #time.sleep(60)
 
 
 
@@ -155,63 +149,67 @@ def main():
     #Code to test
     #Input multiple twitter handles as command line arguments while running script
 
-    for username in sys.argv[1:]:
-        logging.info("Getting follows for @" + username)
-    	response = getAllFriends(username)
-    	records[username] = response[username]
-	if len(records.keys()) > 2:
-	    if os.path.isfile('output/cmdlinesamplefollowingids.json'):		
-	    	with open('output/cmdlinesamplefollowingids.json', 'r') as f:
-			temp_dict = json.load(f)
+#    for username in sys.argv[1:]:
+#       logging.info("Getting follows for @" + username)
+#    	response = getAllFriends(username)
+#    	records[username] = response[username]
+#	if len(records.keys()) > 2:
+#	    if os.path.isfile('output/cmdlinesamplefollowingids.json'):		
+#	    	with open('output/cmdlinesamplefollowingids.json', 'r') as f:
+#			temp_dict = json.load(f)
 			#The following code will take keys from record in case of key conflict. Essential to clean data to have only unique users
-			temp_dict.update(records) 		
-			
-		with open ('output/cmdlinesamplefollowingids.json', 'w') as f:
-			json.dump(temp_dict, f)
-			records = {}
-	    else:
-		with open('output/cmdlinesamplefollowingids.json', 'w') as f:
-			json.dump(records, f)
-
-    with open( 'output/cmdlinesamplefollowingids.json', 'r') as f:
-	temp_dict = json.load(f)
-	temp_dict.update(temp_dict, f)
-    with open('output/cmdlinesamplefollowingids.json', 'w') as f:
-        json.dump(records, f)
-	records = {}
+#			temp_dict.update(records) 		
+#			
+#		with open ('output/cmdlinesamplefollowingids.json', 'w') as f:
+#			json.dump(temp_dict, f)
+#			records = {}
+#	    else:
+#		with open('output/cmdlinesamplefollowingids.json', 'w') as f:
+#			json.dump(records, f)
+#
+#    with open( 'output/cmdlinesamplefollowingids.json', 'r') as f:
+#	temp_dict = json.load(f)
+#	temp_dict.update(temp_dict, f)
+#    with open('output/cmdlinesamplefollowingids.json', 'w') as f:
+#        json.dump(records, f)
+#	records = {}
 
 
     file_name = sys.argv[1]
-    users = pd.read_csv(os.readlink('input') + str(file_name), index_col = 0)
+    users = pd.read_csv('nyers' + str(file_name), index_col = 0)
     users = users.reset_index(drop = True)
     for user in users['username']:
 	response = getAllFriends(user)
+	if response == None:
+	    logging.info('None Response : ' + str(user))
+	    continue
         records[user] = response[user]
-	if len(records.keys()) > 500:
-            if os.path.isfile(os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json'):
-                with open(os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'r') as f:
+	if len(records.keys()) > 50:
+            if os.path.isfile('output/'+ re.sub('.csv','',file_name) + 'followingids.json'):
+                with open('output/'+ re.sub('.csv','',file_name) + 'followingids.json', 'r') as f:
                         temp_dict = json.load(f)
                         #The following code will take keys from record in case of key conflict. 
 			#Essential to use cleaned data that has only unique users
                         temp_dict.update(records)
 
-                with open (os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
+                with open ('output/'+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
                         json.dump(temp_dict, f)
                         records = {}
             else:
-                with open(os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
+		logging.info('First write')
+                with open('output/'+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
                         json.dump(records, f)
 
-    with open( os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'r') as f:
+    logging.info('Out of forloop, before modulus write')
+    with open('output/'+ re.sub('.csv','',file_name) + 'followingids.json', 'r') as f:
+	logging.info('Reading in existing file for end of file')
         temp_dict = json.load(f)
         temp_dict.update(temp_dict, f)
-    with open(os.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
-        json.dump(records, f)
+    with open('output/'+ re.sub('.csv','',file_name) + 'followingids.json', 'w') as f:
+        logging.info('Writing to existing file for end of file')
+	json.dump(records, f)
         records = {}
 	
-    #with open(or.readlink('output')+ re.sub('.csv','',file_name) + 'followingids.json', 'a') as f:
-    #    json.dump(records, f)
-
 
 
 if __name__ == '__main__':
