@@ -14,21 +14,17 @@ import oauth2 as oauth
 import json
 import time
 import datetime
+import logging
+import math
+import re
 
-#Best practice is to NOT keep API keys in GitHub, but it's too late for that!
-#APIKEYS = pd.read_json('cussacAPIKeys.json')
-#CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'].values)[0]
-#CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'].values)[0]
-#ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'].values)[0]
-#ACCESS_TOKEN_SECRET = (APIKEYS['ACCESS_TOKEN_SECRET'].values)[0]
-
-APIKEYS = pd.read_json('./cussacAPIKeys.json', typ = 'series')
+APIKEYS = pd.read_json(str(os.getenv('CUSSAC_KEYS')) + '/cussacAPIKeys.json', typ = 'series')
 CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'])
 CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'])
 ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'])
 ACCESS_TOKEN_SECRET = (APIKEYS['ACCESS_TOKEN_SECRET'])
 
-
+t = datetime.datetime.now()
 
 #dummy empty search term
 searchterm = ' '
@@ -38,6 +34,25 @@ searchterm = ' '
 #Long Island.
 #location = "40.69,-73.94,20mi"
 location = "40.013997, -100.825364, 1300mi"
+
+
+class SystemLog(object):
+    def __init__(self, name=None):
+        self.logger = logging.getLogger(name)
+
+    def write(self, msg, level=logging.INFO):
+        self.logger.log(level, msg)
+
+    def flush(self):
+        for handler in self.logger.handlers:
+            handler.flush()
+
+sys.stdout = SystemLog('stdout')
+sys.stderr = SystemLog('stderr')
+
+def config_logger():
+    logging.basicConfig(filename = './logs/cussac_' + re.sub('.py','',os.path.basename(__file__)) + '_' + datetime.datetime.now().strftime('%b_%d_%y_%H_%M') + '.out', filemode = 'a', format = '%(asctime)s, %(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S', level = logging.DEBUG)
+
 
 def oauth_req(url, http_method="GET", post_body='', http_headers=None):
     consumer = oauth.Consumer(key=CONSUMER_KEY, secret=CONSUMER_SECRET)
@@ -52,11 +67,13 @@ def oauth_req(url, http_method="GET", post_body='', http_headers=None):
     return content
 
 def getTweets():
+    global t
     apicallcount = 0
     # initializing a since_id, which is the earliest tweet ID to return. Prevents duplicates.
     since_id=0
     #initializes empty dataframe
     df = pd.DataFrame()
+    t = datetime.datetime.now()
     while apicallcount > -1:
         baseurl = "https://api.twitter.com/1.1/search/tweets.json?q="+searchterm+\
             "&geocode="+location+"&count=100&since_id="+str(since_id)
@@ -64,14 +81,16 @@ def getTweets():
             queryResults = oauth_req(baseurl)
             apicallcount += 1
         except:
-            print 'Hit error or exceeded call limit, sleeping for 15 minutes'
-            print datetime.datetime.now()
+            logging.info( 'Hit error or exceeded call limit, sleeping for 15 minutes')
+            logging.info(datetime.datetime.now())
             now = datetime.datetime.now().strftime("%m-%d-%y_%H-%M-%S")
-            df.to_csv('TwitterSearchOutput/tweets' + now +'.csv', index_label='index', 
+            df.to_csv(str(os.getenv('CUSSAC_OUTPUT')) + '/nonnyers_tweets' + now +'.csv', index_label='index', 
                 encoding='utf-8')
             df = pd.DataFrame()
             #Twitter's call limits are per 15 minute period
-            time.sleep(901)
+            
+	    time.sleep(math.ceil(900 -(datetime.datetime.now()-t).total_seconds()))
+	    t = datetime.datetime.now()
             continue
         else:
             data = queryResults['statuses']
@@ -87,10 +106,11 @@ def getTweets():
         #saves to csv after every 100 API calls.
         if apicallcount % 100 == 0:
             now = datetime.datetime.now().strftime("%m-%d-%y_%H-%M-%S")
-            df.to_csv('TwitterSearchOutput/tweets' + now +'.csv', index_label='index', encoding='utf-8')
+            df.to_csv(str(os.getenv('CUSSAC_OUTPUT')) + '/nonnyers_tweets' + now +'.csv', index_label='index', encoding='utf-8')
             # Once the results from the last 100 calls have been written to csv,
             # the master dataframe has to be cleared out, as below.
             df = pd.DataFrame()
 
 if __name__ == "__main__":
+    config_logger()
     getTweets()
