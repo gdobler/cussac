@@ -32,8 +32,11 @@ searchterm = ' '
 #approximate centroid for New York City, with a radius of 20 miles--needed to 
 #capture all of Brooklyn and the Bronx, though includes chunks of New Jersey and
 #Long Island.
+#THIS STRING MUST NOT HAVE SPACES
 #location = "40.69,-73.94,20mi"
-location = "40.013997, -100.825364, 1300mi"
+
+
+location = "40.01,-100.82,1300mi"
 
 
 class SystemLog(object):
@@ -93,6 +96,7 @@ def getTweets():
 	    t = datetime.datetime.now()
             continue
         else:
+	    logging.info(queryResults)
             data = queryResults['statuses']
             tempdf = pd.DataFrame(data=data)
             # this creates a new "since_id" which prevents duplicates, unless
