@@ -20,7 +20,7 @@ import datetime
 
 #Best practice is to NOT keep API keys in public GitHub repos!
 
-APIKEYS = pd.read_json('../../cussacTest/cussacAPIKeys.json', typ = 'series')
+APIKEYS = pd.read_json(os.getenv('CUSSAC_KEYS') + '/cussacAPIKeys.json', typ = 'series')
 CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'])
 CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'])
 ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'])
