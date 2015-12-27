@@ -33,10 +33,10 @@ searchterm = ' '
 #capture all of Brooklyn and the Bronx, though includes chunks of New Jersey and
 #Long Island.
 #THIS STRING MUST NOT HAVE SPACES
-#location = "40.69,-73.94,20mi"
+location = "40.69,-73.94,20mi"
 
 
-location = "40.01,-100.82,1300mi"
+#location = "40.01,-100.82,1300mi"
 
 
 class SystemLog(object):
@@ -54,7 +54,7 @@ sys.stdout = SystemLog('stdout')
 sys.stderr = SystemLog('stderr')
 
 def config_logger():
-    logging.basicConfig(filename = './logs/cussac_' + re.sub('.py','',os.path.basename(__file__)) + '_' + datetime.datetime.now().strftime('%b_%d_%y_%H_%M') + '.out', filemode = 'a', format = '%(asctime)s, %(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S', level = logging.DEBUG)
+    logging.basicConfig(filename = str(os.getenv('CUSSAC_LOGS')) + '/' + re.sub('.py','',os.path.basename(__file__)) + '_' + datetime.datetime.now().strftime('%b_%d_%y_%H_%M') + '.out', filemode = 'a', format = '%(asctime)s, %(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S', level = logging.DEBUG)
 
 
 def oauth_req(url, http_method="GET", post_body='', http_headers=None):

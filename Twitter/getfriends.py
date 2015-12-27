@@ -24,7 +24,7 @@ import re
 
 #Best practice is to NOT keep API keys in public GitHub repos!
 
-APIKEYS = pd.read_json('cussacAPIKeys.json', typ = 'series')
+APIKEYS = pd.read_json(os.getenv('CUSSAC_KEYS') + '/cussacAPIKeys.json', typ = 'series')
 CONSUMER_KEY = (APIKEYS['CONSUMER_KEY'])
 CONSUMER_SECRET = (APIKEYS['CONSUMER_SECRET'])
 ACCESS_TOKEN = (APIKEYS['ACCESS_TOKEN'])
@@ -57,7 +57,7 @@ sys.stdout = SystemLog('stdout')
 sys.stderr = SystemLog('stderr')
 
 def config_logger():
-    logging.basicConfig(filename = './logs/cussac_' + re.sub('.py','',os.path.basename(__file__)) + '_' + datetime.datetime.now().strftime('%b_%d_%y_%H_%M') + '.out', filemode = 'a', format = '%(asctime)s, %(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S', level = logging.DEBUG)
+    logging.basicConfig(filename = str(os.getenv('CUSSAC_LOGS')) + '/cussac_' + re.sub('.py','',os.path.basename(__file__)) + '_' + datetime.datetime.now().strftime('%b_%d_%y_%H_%M') + '.out', filemode = 'a', format = '%(asctime)s, %(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S', level = logging.DEBUG)
 
 
 #Setting up API authentication
@@ -86,7 +86,7 @@ def oauth_req(url, http_method="GET", post_body='', http_headers=None):
 def getAllFriends(username):
     apicallcount = 0
     numberofrecords = 0
-    baseApiUrl = 'https://api.twitter.com/1.1/friends/ids.json?screen_name=' + username + '&count=5000'
+    baseApiUrl = 'https://api.twitter.com/1.1/friends/ids.json?user_id=' + str(username) + '&count=5000'
 
     # TODO : handle script for more than 5000 followings
     cursor = -1
@@ -110,10 +110,10 @@ def getAllFriends(username):
 	    logging.info("Time between request and now " + str((t0 - datetime.datetime.now()).total_seconds())+ "seconds")
             continue
 	except NotAuthorizedException:
-	    logging.info("Private account - " + username + ", Getting next username")
+	    logging.info("Private account - " + str(username) + ", Getting next username")
 	    return None
 	except NotFoundException:
-	    logging.info("Handle not found - "+ username)
+	    logging.info("Handle not found - "+ str(username))
 	    return None
 	except Exception as e:
 	    logging.error("Unknown Exception occured" + str(e))
@@ -176,9 +176,9 @@ def main():
 
 
     file_name = sys.argv[1]
-    users = pd.read_csv('nyers' + str(file_name), index_col = 0)
+    users = pd.read_csv(str(os.getenv('CUSSAC_DATA')) + str('/') + str(file_name), index_col = 0)
     users = users.reset_index(drop = True)
-    for user in users['username']:
+    for user in users['ids']:
 	response = getAllFriends(user)
 	if response == None:
 	    logging.info('None Response : ' + str(user))
