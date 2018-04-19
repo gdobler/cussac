@@ -48,29 +48,29 @@ class SystemLog(object):
         logging.basicConfig(filename = str(os.getenv('CUSSAC_LOGS')) + '/cussac_' + re.sub('.py','',os.path.basename(__file__)) + '_' + datetime.datetime.now().strftime('%b_%d_%y_%H_%M') + '.out', filemode = 'a', format = '%(asctime)s, %(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S', level = logging.DEBUG)
 
 
-class TwitterAuth(object):
-    def oauth_req(self, url, http_method="GET", post_body='', http_headers=None):
-        consumer = oauth.Consumer(key=CONSUMER_KEY, secret=CONSUMER_SECRET)
-        token = oauth.Token(key=ACCESS_TOKEN, secret=ACCESS_TOKEN_SECRET)
-        client = oauth.Client(consumer, token)
-        resp, content = client.request( url, method=http_method, body=post_body, headers=http_headers)
-        content = json.loads(content)
-        if resp['status'] == '200':
-    	       return content
-        elif resp['status'] == '429':
-        	logging.info(str(resp))
-        	logging.info("Too many requests")
-        	raise RateLimitException("Invalid response %s." % resp['status'])
-        elif resp['status'] == '401':
-            raise NotAuthorizedException("Not authorized %s." % resp['status'])
-            # TODO: consider terminating the script if theres an error
-        elif resp['status'] == '404':
-        	logging.info("User not Found %s" % resp['status'])
-        	raise NotFoundException()
-        else:
-        	logging.info("Error code : " + str(resp['status']))
-        	raise Exception("Invalid response %s." % resp['status'])
+#class TwitterAuth(object):
+def oauth_req(url, http_method="GET", post_body='', http_headers=None):
+    consumer = oauth.Consumer(key=CONSUMER_KEY, secret=CONSUMER_SECRET)
+    token = oauth.Token(key=ACCESS_TOKEN, secret=ACCESS_TOKEN_SECRET)
+    client = oauth.Client(consumer, token)
+    resp, content = client.request( url, method=http_method, body=post_body, headers=http_headers)
+    content = json.loads(content)
+    if resp['status'] == '200':
+	       return content
+    elif resp['status'] == '429':
+    	logging.info(str(resp))
+    	logging.info("Too many requests")
+    	raise RateLimitException("Invalid response %s." % resp['status'])
+    elif resp['status'] == '401':
+        raise NotAuthorizedException("Not authorized %s." % resp['status'])
+        # TODO: consider terminating the script if theres an error
+    elif resp['status'] == '404':
+    	logging.info("User not Found %s" % resp['status'])
+    	raise NotFoundException()
+    else:
+    	logging.info("Error code : " + str(resp['status']))
+    	raise Exception("Invalid response %s." % resp['status'])
 
 
-sys.stdout = SystemLog('stdout')
-sys.stderr = SystemLog('stderr')
+#sys.stdout = SystemLog('stdout')
+#sys.stderr = SystemLog('stderr')
