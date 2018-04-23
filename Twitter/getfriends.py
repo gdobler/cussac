@@ -106,7 +106,7 @@ def getAllFriends(username):
 		t1 =  datetime.datetime.now()
 		time.sleep(60)
 		logging.info('Been sleeping for so far ' + str((t0 - datetime.datetime.now()).total_seconds()) + "seconds")
-		
+
 	    logging.info("Time between request and now " + str((t0 - datetime.datetime.now()).total_seconds())+ "seconds")
             continue
 	except NotAuthorizedException:
@@ -154,12 +154,12 @@ def main():
 #    	response = getAllFriends(username)
 #    	records[username] = response[username]
 #	if len(records.keys()) > 2:
-#	    if os.path.isfile('output/cmdlinesamplefollowingids.json'):		
+#	    if os.path.isfile('output/cmdlinesamplefollowingids.json'):
 #	    	with open('output/cmdlinesamplefollowingids.json', 'r') as f:
 #			temp_dict = json.load(f)
 			#The following code will take keys from record in case of key conflict. Essential to clean data to have only unique users
-#			temp_dict.update(records) 		
-#			
+#			temp_dict.update(records)
+#
 #		with open ('output/cmdlinesamplefollowingids.json', 'w') as f:
 #			json.dump(temp_dict, f)
 #			records = {}
@@ -188,7 +188,7 @@ def main():
             if os.path.isfile('output/'+ re.sub('.csv','',file_name) + 'followingids.json'):
                 with open('output/'+ re.sub('.csv','',file_name) + 'followingids.json', 'r') as f:
                         temp_dict = json.load(f)
-                        #The following code will take keys from record in case of key conflict. 
+                        #The following code will take keys from record in case of key conflict.
 			#Essential to use cleaned data that has only unique users
                         temp_dict.update(records)
 
@@ -209,7 +209,7 @@ def main():
         logging.info('Writing to existing file for end of file')
 	json.dump(records, f)
         records = {}
-	
+
 
 
 if __name__ == '__main__':
