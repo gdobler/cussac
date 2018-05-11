@@ -48,7 +48,8 @@ class SystemLog(object):
         logging.basicConfig(filename = str(os.getenv('CUSSAC_LOGS')) + '/cussac_' + re.sub('.py','',os.path.basename(__file__)) + '_' + datetime.datetime.now().strftime('%b_%d_%y_%H_%M') + '.out', filemode = 'a', format = '%(asctime)s, %(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S', level = logging.DEBUG)
 
 
-#class TwitterAuth(object):
+#Authentocates users
+
 def oauth_req(url, http_method="GET", post_body='', http_headers=None):
     consumer = oauth.Consumer(key=CONSUMER_KEY, secret=CONSUMER_SECRET)
     token = oauth.Token(key=ACCESS_TOKEN, secret=ACCESS_TOKEN_SECRET)
